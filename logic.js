@@ -69,6 +69,19 @@ document.querySelectorAll('.carousel').forEach(carousel => {
     mouseDown = false;
   });
 
-  // All'avvio, posizionati sulla prima card reale
-  jumpTo(2);
+  // All'avvio, posizionati sulla prima card reale SOLO dopo caricamento immagini
+  const imgs = track.querySelectorAll('img');
+  let loaded = 0;
+  if (imgs.length === 0) {
+    jumpTo(2);
+  } else {
+    imgs.forEach(img => {
+      if (img.complete) loaded++;
+      else img.addEventListener('load', () => {
+        loaded++;
+        if (loaded === imgs.length) jumpTo(2);
+      });
+    });
+    if (loaded === imgs.length) jumpTo(2);
+  }
 });
