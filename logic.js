@@ -14,12 +14,26 @@ document.querySelectorAll('.carousel').forEach(carousel => {
   const cards = Array.from(track.querySelectorAll('.carousel-card'));
   let current = 2; // card centrale reale (indice relativo ai cloni)
 
+  function getGap() {
+    const style = window.getComputedStyle(track);
+    const gap = parseFloat(style.gap || style.columnGap || '16');
+    return isNaN(gap) ? 16 : gap;
+  }
+
+  function getHorizontalPadding() {
+    const style = window.getComputedStyle(track);
+    return parseFloat(style.paddingLeft || '0');
+  }
+
   function updateCarousel(animate = true) {
     cards.forEach((card, i) => {
       card.classList.toggle('active', i === current);
     });
-    const cardWidth = cards[0].offsetWidth + 16; // 16px gap
-    const offset = (cardWidth * current) - (carousel.offsetWidth / 2) + (cardWidth / 2);
+    const gap = getGap();
+    const cardWidth = cards[0].offsetWidth;
+    const paddingLeft = getHorizontalPadding();
+    // gap * (current) perché il gap è solo tra le card, non dopo l'ultima
+    const offset = (cardWidth * current) + (gap * current) - (carousel.offsetWidth / 2) + (cardWidth / 2) + paddingLeft;
     track.style.transition = animate ? 'transform 0.4s cubic-bezier(.4,1.3,.5,1)' : 'none';
     track.style.transform = `translateX(${-offset}px)`;
   }
