@@ -1,0 +1,90 @@
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #111;
+  color: #fff;
+}
+
+.carousel {
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+  padding: 2rem 0;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.4s cubic-bezier(.4,1.3,.5,1);
+  will-change: transform;
+  gap: 1rem;
+  padding: 0 1rem;
+}
+
+.carousel-card {
+  min-width: 70vw;
+  height: 60vw;
+  max-width: 350px;
+  max-height: 500px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  transition: transform 0.4s, box-shadow 0.4s;
+  border: 3px solid #3BD2C9;
+}
+
+.card-overlay {
+  width: 100%;
+  background: linear-gradient(0deg, rgba(0,0,0,0.7) 70%, rgba(0,0,0,0.1) 100%);
+  color: #fff;
+  padding: 1.2rem 1rem 1rem 1rem;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  box-sizing: border-box;
+}
+
+.card-overlay h2 {
+  margin: 0 0 0.3em 0;
+  font-size: 1.3em;
+  font-weight: 700;
+}
+
+.card-overlay p {
+  margin: 0;
+  font-size: 1em;
+  opacity: 0.85;
+}
+
+/* Effetto "centrale" */
+.carousel-card {
+  opacity: 0.5;
+  transform: scale(0.85);
+  z-index: 1;
+}
+.carousel-card.active {
+  opacity: 1;
+  transform: scale(1);
+  z-index: 2;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+}
+
+@media (min-width: 600px) {
+  .carousel-card {
+    min-width: 320px;
+    height: 420px;
+  }
+}
+
+.card-background {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center; 
+}
