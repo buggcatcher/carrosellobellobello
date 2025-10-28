@@ -1,76 +1,74 @@
-// Carosello mobile-first: logica per card centrale e swipe con loop infinito
-const track = document.querySelector('.carousel-track');
-const originalCards = Array.from(document.querySelectorAll('.carousel-card'));
-const total = originalCards.length;
+// Carosello multiistanza: logica per ogni carosello indipendente
 
-// Clona le ultime e prime card per effetto loop
-const firstClone = originalCards[0].cloneNode(true);
-const lastClone = originalCards[total - 1].cloneNode(true);
-track.insertBefore(lastClone, originalCards[0]);
-track.appendChild(firstClone);
+document.querySelectorAll('.carousel').forEach(carousel => {
+  const track = carousel.querySelector('.carousel-track');
+  const originalCards = Array.from(track.querySelectorAll('.carousel-card'));
+  const total = originalCards.length;
 
-const cards = Array.from(document.querySelectorAll('.carousel-card'));
-let current = 2; // card centrale reale (indice relativo ai cloni)
+  // Clona le ultime e prime card per effetto loop
+  const firstClone = originalCards[0].cloneNode(true);
+  const lastClone = originalCards[total - 1].cloneNode(true);
+  track.insertBefore(lastClone, originalCards[0]);
+  track.appendChild(firstClone);
 
-function updateCarousel(animate = true) {
-  cards.forEach((card, i) => {
-    card.classList.toggle('active', i === current);
+  const cards = Array.from(track.querySelectorAll('.carousel-card'));
+  let current = 2; // card centrale reale (indice relativo ai cloni)
+
+  function updateCarousel(animate = true) {
+    cards.forEach((card, i) => {
+      card.classList.toggle('active', i === current);
+    });
+    const cardWidth = cards[0].offsetWidth + 16; // 16px gap
+    const offset = (cardWidth * current) - (carousel.offsetWidth / 2) + (cardWidth / 2);
+    track.style.transition = animate ? 'transform 0.4s cubic-bezier(.4,1.3,.5,1)' : 'none';
+    track.style.transform = `translateX(${-offset}px)`;
+  }
+
+  function jumpTo(index) {
+    current = index;
+    updateCarousel(false);
+  }
+
+  updateCarousel();
+  window.addEventListener('resize', () => updateCarousel(false));
+
+  // Swipe touch
+  let startX = null;
+  track.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
   });
-  const cardWidth = cards[0].offsetWidth + 16; // 16px gap
-  const offset = (cardWidth * current) - (window.innerWidth / 2) + (cardWidth / 2);
-  track.style.transition = animate ? 'transform 0.4s cubic-bezier(.4,1.3,.5,1)' : 'none';
-  track.style.transform = `translateX(${-offset}px)`;
-}
+  track.addEventListener('touchmove', e => {
+    if (startX === null) return;
+    const dx = e.touches[0].clientX - startX;
+    if (Math.abs(dx) > 40) {
+      if (dx < 0) current++;
+      if (dx > 0) current--;
+      updateCarousel();
+      startX = null;
+    }
+  });
+  track.addEventListener('transitionend', () => {
+    if (current === cards.length - 1) jumpTo(1); // clone in fondo → prima reale
+    if (current === 0) jumpTo(cards.length - 2); // clone in testa → ultima reale
+  });
 
-function jumpTo(index) {
-  current = index;
-  updateCarousel(false);
-}
+  // Swipe mouse (desktop)
+  let mouseDown = false, mouseStartX = null;
+  track.addEventListener('mousedown', e => {
+    mouseDown = true;
+    mouseStartX = e.clientX;
+  });
+  track.addEventListener('mouseup', e => {
+    if (!mouseDown) return;
+    const dx = e.clientX - mouseStartX;
+    if (Math.abs(dx) > 40) {
+      if (dx < 0) current++;
+      if (dx > 0) current--;
+      updateCarousel();
+    }
+    mouseDown = false;
+  });
 
-updateCarousel();
-window.addEventListener('resize', () => updateCarousel(false));
-
-// Swipe touch
-let startX = null;
-track.addEventListener('touchstart', e => {
-  startX = e.touches[0].clientX;
+  // All'avvio, posizionati sulla prima card reale
+  jumpTo(2);
 });
-track.addEventListener('touchmove', e => {
-  if (startX === null) return;
-  const dx = e.touches[0].clientX - startX;
-  if (Math.abs(dx) > 40) {
-    if (dx < 0) current++;
-    if (dx > 0) current--;
-    updateCarousel();
-    startX = null;
-  }
-});
-track.addEventListener('transitionend', () => {
-  // Se siamo su un clone, salta istantaneamente alla card reale
-  if (current === cards.length - 1) jumpTo(1); // clone in fondo → prima reale
-  if (current === 0) jumpTo(cards.length - 2); // clone in testa → ultima reale
-});
-
-// Swipe mouse (desktop)
-let mouseDown = false, mouseStartX = null;
-track.addEventListener('mousedown', e => {
-  mouseDown = true;
-  mouseStartX = e.clientX;
-});
-track.addEventListener('mouseup', e => {
-  if (!mouseDown) return;
-  const dx = e.clientX - mouseStartX;
-  if (Math.abs(dx) > 40) {
-    if (dx < 0) current++;
-    if (dx > 0) current--;
-    updateCarousel();
-  }
-  mouseDown = false;
-});
-track.addEventListener('transitionend', () => {
-  if (current === cards.length - 1) jumpTo(1);
-  if (current === 0) jumpTo(cards.length - 2);
-});
-
-// All'avvio, posizionati sulla prima card reale
-jumpTo(2);
